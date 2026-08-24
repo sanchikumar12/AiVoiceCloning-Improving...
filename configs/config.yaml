@@ -1,0 +1,87 @@
+# Voice Cloning System Configuration (ElevenLabs-Class Production Standard)
+
+system:
+  device: "cuda"            # 'cuda', 'mps', or 'cpu'
+  mixed_precision: "bf16"   # 'bf16', 'fp16', or 'fp32'
+  seed: 42
+  sample_rate: 24000
+  hop_length: 320
+  win_length: 1024
+  n_mels: 80
+
+codec:
+  type: "mimi_split_rvq"     # Options: 'mimi_split_rvq', 'dac_rvq', 'xcodec2_fsq'
+  sample_rate: 24000
+  frame_rate: 12.5          # Hz - optimal low frame rate for short token sequence
+  num_codebooks: 8          # Codebook 0 is semantic, 1-7 are acoustic details
+  codebook_size: 2048       # Quantizer entries per codebook
+  latent_dim: 512
+  downsample_factors: [2, 4, 5, 8] # Total downsampling: 320x -> 12.5Hz at 24kHz
+  encoder_channels: 64
+  causal: true              # Fully causal SEANet backbone for streaming
+
+speaker_encoder:
+  type: "joint_learnable_ecapa" # Options: 'ecapa_tdnn', 'joint_learnable_ecapa'
+  embedding_dim: 256
+  prosody_tokens: 32        # Local prosodic tokens for Perceiver cross-attention
+  num_channels: 512
+  lin_neurons: 192
+  disentangle_style: true   # Separate timbre from emotional prosody
+
+frontend:
+  locale: "en-US"
+  g2p_backend: "hybrid_phonemizer" # 'espeak', 'cmu_dict', 'hybrid_phonemizer'
+  vocab_size: 4096
+  use_explicit_duration: false     # Implicit AR duration modeling
+  max_text_length: 512
+
+stage1_lm:
+  model_type: "decoder_only_transformer"
+  num_layers: 16
+  hidden_dim: 768
+  intermediate_dim: 2048
+  num_heads: 12
+  head_dim: 64
+  norm_eps: 1e-6
+  rope_theta: 10000.0
+  vocab_size: 2048          # Semantic audio token vocab (first codebook)
+  text_vocab_size: 4096
+  cfg_dropout_prob: 0.15    # Classifier-Free Guidance training dropout
+  inference:
+    temperature: 0.75
+    top_p: 0.92
+    repetition_penalty: 1.25 # Specialized audio token repetition damping
+    cfg_scale: 1.8
+    max_gen_tokens: 1024
+
+stage2_flow:
+  model_type: "dit_cfm"     # Diffusion Transformer Conditional Flow Matching
+  depth: 12
+  hidden_dim: 512
+  num_heads: 8
+  in_channels: 80           # Mel / acoustic latent channels
+  cond_dim: 512             # Semantic token projection + speaker embedding
+  ode_solver: "midpoint"    # 'euler' or 'midpoint'
+  ode_steps: 16             # Optimal sampling steps for real-time latency
+  cfg_scale: 2.0
+  sigma_min: 1e-4
+
+watermark:
+  type: "audioseal"
+  enabled: true
+  watermark_bits: 16
+  detector_threshold: 0.5
+  imperceptible_snr_min: 38.0 # Minimum SNR (dB) to guarantee zero human perceptual degradation
+
+consent:
+  strict_mode: true
+  similarity_threshold: 0.78
+  anti_spoofing_enabled: true
+  challenge_phrase_required: true
+
+serving:
+  host: "0.0.0.0"
+  port: 8000
+  ttfb_target_ms: 280
+  streaming_chunk_size_ms: 200
+  max_concurrent_streams: 64

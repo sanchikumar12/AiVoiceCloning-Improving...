@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoiceClone AI — Production Zero-Shot Speech Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/ui/style.css">
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="header">
+    <div class="logo-group">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="22"></line>
+        </svg>
+      </div>
+      <span class="brand-title">VoiceClone Studio</span>
+      <span class="badge">ElevenLabs-Class</span>
+    </div>
+    <div class="watermark-pill">
+      <span class="status-dot"></span>
+      <span>AudioSeal Protected</span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    <div class="grid-layout">
+      
+      <!-- Left Column: Voice Profiles & Safety Consent -->
+      <aside class="sidebar">
+        <!-- Voice Selection Card -->
+        <div class="card">
+          <h2 class="card-title">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"></circle><path d="M5.5 21a8.5 8.5 0 0 1 13 0"></path></svg>
+            Speaker Timbre Profiles
+          </h2>
+          <div class="voice-list" id="voiceList">
+            <div class="voice-item active" data-voice="default_voice">
+              <div class="voice-meta">
+                <div class="voice-avatar">DV</div>
+                <div>
+                  <div style="font-weight: 600;">Default Studio Voice</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Pre-trained Timbre (256-dim)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Register Voice Modal / Section -->
+          <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+            <h3 style="font-size: 0.9rem; margin-bottom: 0.75rem;">Clone New Voice (Consent Gated)</h3>
+            <div class="form-group">
+              <label>Voice Identifier</label>
+              <input type="text" id="newVoiceId" placeholder="e.g. narrator_sarah">
+            </div>
+            <div class="form-group">
+              <label>Reference Audio (3s - 30s)</label>
+              <input type="file" id="refAudioInput" accept="audio/*">
+            </div>
+            <div class="form-group">
+              <label>Spoken Consent Pledge Audio (Optional if Bypassed)</label>
+              <input type="file" id="consentAudioInput" accept="audio/*">
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                Pledge: <i>"I hereby authorize the cloning..."</i>
+              </div>
+            </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <input type="checkbox" id="bypassConsentCheck" style="width: auto; cursor: pointer;">
+              <label for="bypassConsentCheck" style="margin-bottom: 0; font-size: 0.8rem; cursor: pointer; color: #a5b4fc;">
+                Bypass Consent (Dev / Test Mode)
+              </label>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%;" id="btnRegisterVoice">
+              Verify & Register Profile
+            </button>
+            <div id="consentStatus" style="font-size: 0.8rem; margin-top: 8px; line-height: 1.4;"></div>
+
+          </div>
+        </div>
+
+        <!-- Watermark Inspection Card -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <h2 class="card-title">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Watermark Inspector
+          </h2>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px;">
+            Upload any audio to verify AI provenance via AudioSeal sample-level detector.
+          </p>
+          <input type="file" id="inspectAudioInput" accept="audio/*" style="margin-bottom: 10px;">
+          <button class="btn btn-secondary" style="width: 100%;" id="btnInspectWatermark">
+            Detect Provenance
+          </button>
+          <div id="inspectResult" style="margin-top: 10px; font-size: 0.82rem;"></div>
+        </div>
+      </aside>
+
+      <!-- Right Column: Generation Studio & Telemetry -->
+      <section class="main-studio">
+        <div class="card">
+          <h2 class="card-title">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            Zero-Shot Synthesis Studio
+          </h2>
+
+          <!-- Text Prompt Area -->
+          <div class="form-group">
+            <label>Input Text (Normalized & Phonetized)</label>
+            <textarea id="promptText" rows="4" placeholder="Enter text to synthesize...">Welcome to the next generation of voice cloning. Our two-stage autoregressive and conditional flow-matching architecture produces lifelike zero-shot speech with embedded AudioSeal watermarking.</textarea>
+          </div>
+
+          <!-- Hyperparameter, Emotion & Gender Controls -->
+          <div style="display: grid; grid-template-columns: 1.1fr 1.1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <div class="form-group">
+              <label>Human Voice Tone & Gender</label>
+              <select id="genderToneSelect" style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); color: #f8fafc; padding: 7px 10px; border-radius: 8px; width: 100%; font-size: 0.82rem; outline: none; cursor: pointer;">
+                <option value="auto" selected>✨ Auto-Match Reference Speaker</option>
+                <option value="male_deep">🎙️ Deep Rich Male (Adam / Christopher)</option>
+                <option value="male_warm">🗣️ Warm Conversational Male (Andrew)</option>
+                <option value="female_lively">🌟 Lively Natural Female (Ava / Sarah)</option>
+                <option value="female_gentle">🕊️ Gentle Empathetic Female (Emma)</option>
+                <option value="male_uk">🇬🇧 British Male (Ryan)</option>
+                <option value="female_uk">🇬🇧 British Female (Sonia)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Emotional Speaking Style</label>
+              <select id="emotionSelect" style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); color: #f8fafc; padding: 7px 10px; border-radius: 8px; width: 100%; font-size: 0.82rem; outline: none; cursor: pointer;">
+                <option value="conversational" selected>🎭 Conversational (Warm & Lifelike)</option>
+                <option value="storyteller">📖 Storyteller (Engaging & Emotive)</option>
+                <option value="empathetic">🕊️ Empathetic (Soft & Caring)</option>
+                <option value="professional">🎙️ Studio Broadcast (Authoritative)</option>
+                <option value="energetic">⚡ Energetic (Vibrant & Upbeat)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Temperature (<span id="tempVal">0.75</span>)</label>
+              <div class="range-slider">
+                <input type="range" id="tempSlider" min="0.1" max="1.5" step="0.05" value="0.75">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>ODE Flow Steps (<span id="odeVal">16</span>)</label>
+              <div class="range-slider">
+                <input type="range" id="odeSlider" min="8" max="32" step="2" value="16">
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- Action Button -->
+          <button class="btn btn-primary" id="btnSynthesize">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Synthesize Cloned Voice
+          </button>
+
+          <!-- Waveform Visualizer -->
+          <div style="margin-top: 1.5rem;">
+            <label>Neural Audio Waveform</label>
+            <div class="visualizer-box">
+              <canvas id="waveformCanvas"></canvas>
+            </div>
+          </div>
+
+          <!-- Audio Player -->
+          <audio id="audioPlayer" controls></audio>
+
+          <!-- Telemetry & Performance Metrics -->
+          <div class="telemetry-grid">
+            <div class="telemetry-card">
+              <div class="telemetry-val" id="valDuration">0.0s</div>
+              <div class="telemetry-lbl">Audio Duration</div>
+            </div>
+            <div class="telemetry-card">
+              <div class="telemetry-val" id="valLatency">0ms</div>
+              <div class="telemetry-lbl">Synthesis Latency</div>
+            </div>
+            <div class="telemetry-card">
+              <div class="telemetry-val" id="valRTF">0.00x</div>
+              <div class="telemetry-lbl">Real-Time Factor</div>
+            </div>
+            <div class="telemetry-card">
+              <div class="telemetry-val" id="valSNR">42.0 dB</div>
+              <div class="telemetry-lbl">Watermark SNR</div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="/ui/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "voice-clone"
+version = "1.0.0"
+description = "Production-grade zero-shot TTS and voice cloning system (ElevenLabs-class)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26.0",
+    "scipy>=1.12.0",
+    "soundfile>=0.12.1",
+    "pyyaml>=6.0.1",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.28.0",
+    "pydantic>=2.6.0",
+    "tqdm>=4.66.0"
+]
+
+[project.optional-dependencies]
+torch = [
+    "torch>=2.2.0",
+    "torchaudio>=2.2.0"
+]
+safety = [
+    "audioseal>=0.1.0"
+]
+frontend = [
+    "phonemizer>=3.2.1"
+]
+all = [
+    "torch>=2.2.0",
+    "torchaudio>=2.2.0",
+    "audioseal>=0.1.0",
+    "phonemizer>=3.2.1",
+    "whisper>=1.1.10"
+]
